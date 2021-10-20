@@ -1,3 +1,6 @@
+"""IRS object to calculate the IRS for a given year using the IRS table in the
+data folder. 
+"""
 from pathlib import Path
 from datetime import date
 
@@ -8,6 +11,19 @@ IAS = 438.81 * 12 * 0.72
 
 
 class IRS:
+    """The object itself that allows adding previous and expected gains.
+
+    Examples
+    -------
+    >>> person = IRS()
+    >>> person.add_previous_values_cat_a(10000, 2000)
+    >>> person.add_expected_values_cat_b(1500, 0.2)
+    >>> person.calculate_irs_payable()
+    -1041.86
+    >>> another = IRS()
+    >>> another.add_previous_values_cat_b(10000,3000)
+    >>> together = person + another
+    """
     def __init__(self):
         self.tabela = pd.read_excel(Path(__file__).parent / "data" / "tabela_irs.xlsx")
         self.leftover_months = 13 - date.today().month
@@ -51,5 +67,5 @@ class IRS:
         rest_tx = self.tabela.iloc[ix+1,-2]
         self.payable_irs = med_tx * max_at_med_tx + rest_tx * (self.total_irs_deductible - max_at_med_tx)
         self.payable_irs *= self.number_of_people
-        return self.payable_irs - self.total_irs_deducted
+        return round(self.payable_irs - self.total_irs_deducted,2)
     
